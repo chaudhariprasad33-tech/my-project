@@ -1,13 +1,3 @@
-# %% [markdown]
-# # End-to-End Data Science Project: Customer Segmentation
-# This script is structured for VS Code IDE's Interactive Window or Jupyter Notebook.
-# It performs end-to-end data analysis on the 'Mall Customer' dataset.
-
-# %% [markdown]
-# ## 1. Data Understanding
-# Loading the libraries and understanding the basic shape and properties of the data.
-
-# %%
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,11 +27,8 @@ df.info()
 print("\nFirst 5 Rows:")
 print(df.head())
 
-# %% [markdown]
 # ## 2. Data Cleaning
 # Handling missing values, duplicates, and converting categorical columns (Gender).
-
-# %%
 print("Missing values before cleaning:\n", df.isnull().sum())
 
 # 1. Handle missing values
@@ -72,14 +59,6 @@ print("\nMissing values after cleaning:\n", df.isnull().sum())
 # Drop CustomerID as it serves only as an identifier and has zero analytical value
 if 'CustomerID' in df.columns:
     df.drop('CustomerID', axis=1, inplace=True)
-
-# %% [markdown]
-# ## 3. Data Processing & Feature Engineering
-# Creating new meaningful features and scaling the inputs.
-
-# %%
-# 1. Create a new meaningful feature
-# 'Income to Spending Ratio' = Annual Income / Spending Score
 # Usefulness: This ratio highlights spending behavior. A high ratio equates to a cautious saver, 
 # whereas a lower ratio indicates impulse or lavish spending relative to what they earn.
 df['Income to Spending Ratio'] = df['Annual Income (k$)'] / (df['Spending Score (1-100)'] + 1e-5)
@@ -94,12 +73,6 @@ df_scaled = pd.DataFrame(scaled_features, columns=features_to_scale)
 
 print("\nFeature Engineering completed. Preview of standardized data (Age, Income, Spending):")
 print(df_scaled.head())
-
-# %% [markdown]
-# ## 4. Exploratory Data Analysis (EDA)
-# Uncovering patterns using visualizations.
-
-# %%
 sns.set_theme(style="whitegrid")
 
 # 4.1 Age vs Spending Score
@@ -135,13 +108,7 @@ correlation_matrix = df[['Gender', 'Age', 'Annual Income (k$)', 'Spending Score 
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title('Correlation Heatmap')
 plt.show()
-# INSIGHT: Age and Spending Score share a notable negative correlation, confirming older clients tend to spend less.
 
-# %% [markdown]
-# ## 5. Customer Segmentation
-# Grouping customers mathematically based on similar traits.
-
-# %%
 # We pass Age, Income, and Spending Score for K-Means clustering.
 X_cluster = df_scaled[['Age', 'Annual Income (k$)', 'Spending Score (1-100)']]
 
@@ -179,24 +146,4 @@ plt.title('Customer Segments (K-Means Clustering)')
 plt.legend(title='Cluster')
 plt.show()
 
-# %% [markdown]
-# ## 6. Insights & Business Recommendations
-
-# %%
-"""
-### Customer Segment Insights:
-The clusters generally map to 5 unique personas:
-- **Target/Champion Customers:** High Income, High Spending. These customers don't mind premium pricing and spend lavishly.
-- **Careful/Saver Customers:** High Income, Low Spending. Have high purchasing authority but prefer frugality.
-- **General Market:** Average Income, Average Spending. Forms the biggest majority of steady revenue.
-- **Careless/Young Spenders:** Low Income, High Spending. They prefer engaging with retail despite limited capacity.
-- **Sensible Shoppers:** Low Income, Low Spending. Highly budget-conscious and strictly need-based.
-
-### 5 Actionable Business Recommendations:
-1. **VIP Loyalty Programs (For Target Customers):** Reward your high-spending base with exclusive "early-bird" access to luxury arrivals to retain them.
-2. **Quality & Value Marketing (For Careful Customers):** Pitch products emphasizing durability to break their savings habit using long-term value propositions.
-3. **Flexible Payment & EMI (For Careless Spenders):** Support these low-income/high-affinity buyers with "Buy Now, Pay Later" (BNPL) schemes and bundles.
-4. **Volume Discounts & Promos (For General Market):** Keep the mass traffic engaged on weekends using seasonal flash sales and BOGO offers.
-5. **Clearance Alerts (For Sensible Shoppers):** Push SMS alerts for deep clearance and basic essential discounts directly to this group.
-"""
 print("\nSuccess! End-to-end data science project run dynamically complete.")
