@@ -1,0 +1,65 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+  df = pd.read_csv("superstore_sales.csv")
+df.head()
+  # Check info
+df.info()
+
+# Handle missing values
+df.isnull().sum()
+df = df.dropna()
+
+# Remove duplicates
+df = df.drop_duplicates()
+
+# Convert date columns
+df['Order Date'] = pd.to_datetime(df['Order Date'])
+df['Ship Date'] = pd.to_datetime(df['Ship Date'])
+  # Extract time features
+df['Year'] = df['Order Date'].dt.year
+df['Month'] = df['Order Date'].dt.month
+df['Month_Name'] = df['Order Date'].dt.month_name()
+
+# Profit Margin
+df['Profit_Margin'] = df['Profit'] / df['Sales']
+
+# Order Value per order
+aov = df.groupby('Order ID')['Sales'].sum().mean()
+print("Average Order Value:", aov)
+  total_sales = df['Sales'].sum()
+total_profit = df['Profit'].sum()
+avg_order_value = df.groupby('Order ID')['Sales'].sum().mean()
+profit_margin = total_profit / total_sales
+
+print(total_sales, total_profit, avg_order_value, profit_margin)
+  monthly_sales = df.groupby(['Year','Month'])['Sales'].sum().reset_index()
+
+plt.figure()
+sns.lineplot(data=monthly_sales, x='Month', y='Sales', hue='Year')
+plt.title("Monthly Sales Trend")
+plt.show()
+  category_sales = df.groupby('Category')['Sales'].sum()
+
+category_sales.plot(kind='bar')
+plt.title("Sales by Category")
+plt.show()
+  top_products = df.groupby('Product Name')['Sales'].sum().sort_values(ascending=False).head(10)
+
+top_products.plot(kind='barh')
+plt.title("Top 10 Products")
+plt.show()
+  loss_products = df.groupby('Product Name')['Profit'].sum().sort_values().head(10)
+
+loss_products.plot(kind='barh')
+plt.title("Worst Performing Products")
+plt.show()
+  region_sales = df.groupby('Region')['Sales'].sum()
+
+region_sales.plot(kind='pie', autopct='%1.1f%%')
+plt.title("Sales by Region")
+plt.show()
+  sns.scatterplot(x='Discount', y='Profit', data=df)
+plt.title("Discount vs Profit")
+plt.show()
