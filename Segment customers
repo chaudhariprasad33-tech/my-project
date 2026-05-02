@@ -1,0 +1,69 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+df = pd.read_csv("customer_behavior.csv")
+df.head()
+# Check structure
+df.info()
+
+# Missing values
+df.isnull().sum()
+
+# Drop or fill
+df = df.dropna()
+
+# Remove duplicates
+df = df.drop_duplicates()
+
+# Convert date column if exists
+df['Transaction_Date'] = pd.to_datetime(df['Transaction_Date'])
+# Recency (days since last purchase)
+df['Recency'] = (df['Transaction_Date'].max() - df['Transaction_Date']).dt.days
+
+# Frequency
+frequency = df.groupby('Customer_ID')['Transaction_ID'].count()
+
+# Monetary
+monetary = df.groupby('Customer_ID')['Amount'].sum()
+
+rfm = pd.DataFrame({
+    'Recency': df.groupby('Customer_ID')['Recency'].min(),
+    'Frequency': frequency,
+    'Monetary': monetary
+})
+scaler = StandardScaler()
+rfm_scaled = scaler.fit_transform(rfm)
+kmeans = KMeans(n_clusters=4, random_state=42)
+rfm['Cluster'] = kmeans.fit_predict(rfm_scaled)
+rfm.groupby('Cluster').mean()
+def segment(row):
+    if row['Cluster'] == 0:
+        return "High Value Customers"
+    elif row['Cluster'] == 1:
+        return "At Risk"
+    elif row['Cluster'] == 2:
+        return "Frequent Buyers"
+    else:
+        return "Low Value"
+
+rfm['Segment'] = rfm.apply(segment, axis=1)
+sns.boxplot(data=rfm)
+plt.title("RFM Distribution")
+plt.show()
+plt.scatter(rfm['Recency'], rfm['Monetary'], c=rfm['Cluster'], cmap='viridis')
+plt.xlabel("Recency")
+plt.ylabel("Monetary")
+plt.title("Customer Segments")
+plt.show()
+df.groupby('Transaction_Date')['Amount'].sum().plot()
+plt.title("Sales Over Time")
+plt.show()
+rfm['Churn_Risk'] = rfm['Recency'].apply(lambda x: "High" if x > 90 else "Low")
+
+sns.countplot(x='Churn_Risk', data=rfm)
+plt.title("Churn Risk Distribution")
+plt.show()
